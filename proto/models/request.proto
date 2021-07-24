@@ -1,0 +1,6 @@
+syntax = "proto3";
+package sample.models;
+
+message SampleRequest {
+  int64 id = 1;
+}

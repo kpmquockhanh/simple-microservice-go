@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+package sample.models;
+
+message SampleResponse {
+  bool status = 1;
+}

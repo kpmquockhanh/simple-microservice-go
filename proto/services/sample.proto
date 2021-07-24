@@ -1,0 +1,14 @@
+syntax = "proto3";
+package sample.services;
+
+service Sample {
+  rpc GetNumber(SampleRequest) returns (SampleResponse);
+}
+
+message SampleRequest {
+  int64 id = 1;
+}
+
+message SampleResponse {
+  bool status = 1;
+}
