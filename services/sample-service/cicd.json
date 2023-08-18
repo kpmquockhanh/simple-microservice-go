@@ -1,0 +1,17 @@
+{
+  "allow_generate_jenkinsfile": true,
+  "app_type": "service",
+  "build": {
+    "cmd_bin_dir": "services/sample-service",
+    "image_name": "kpmquockhanh/services/sample-service"
+  },
+  "deploy": {
+    "service_name": "sample-service",
+    "dev_expose_port": 31998,
+    "replicas": {
+      "staging": 1,
+      "production": 1
+    },
+    "config_remote_keys": []
+  }
+}

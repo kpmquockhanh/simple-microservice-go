@@ -1,10 +1,10 @@
 package sd
 
 import (
-"time"
+	"time"
 
-"github.com/hashicorp/consul/api"
-"google.golang.org/grpc/resolver"
+	"github.com/hashicorp/consul/api"
+	"google.golang.org/grpc/resolver"
 )
 
 type ConsulResolverBuilder struct {
@@ -39,8 +39,9 @@ func (b *ConsulResolverBuilder) Scheme() string {
 }
 
 func RegisterDefault(watchInterval time.Duration) {
-	resolver.Register(&ConsulResolverBuilder{
+	builder := &ConsulResolverBuilder{
 		WatchInterval:      watchInterval,
 		ConsulClientConfig: api.DefaultConfig(),
-	})
+	}
+	resolver.Register(builder)
 }

@@ -1,5 +1,6 @@
 syntax = "proto3";
-package sample.services;
+package core.services;
+option go_package = "simple-micro/api/services";
 
 service Sample {
   rpc GetNumber(SampleRequest) returns (SampleResponse);
@@ -11,4 +12,5 @@ message SampleRequest {
 
 message SampleResponse {
   bool status = 1;
+  map<string, string> data = 2;
 }

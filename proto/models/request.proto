@@ -1,6 +1,4 @@
 syntax = "proto3";
-package sample.models;
+package core.models;
+option go_package = "simple-micro/api/models";
 
-message SampleRequest {
-  int64 id = 1;
-}

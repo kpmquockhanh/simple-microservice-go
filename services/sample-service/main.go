@@ -1,12 +1,9 @@
 package main
 
 import (
-	"fmt"
+	"context"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/health/grpc_health_v1"
-	"log"
-	"net"
-	"simple-micro/core/sd"
+	app2 "simple-micro/core/app"
 	sample_services "simple-micro/exmsg/services"
 )
 
@@ -15,34 +12,27 @@ const (
 )
 
 func main() {
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+	app := app2.App{
+		Name: "Sample service",
+		Code: "sample-service",
+		Type: app2.ServiceType,
+		Port: 50051,
 	}
 	s := grpc.NewServer()
 	sample_services.RegisterSampleServer(s, &server{})
-
-	//Use consul to register service
-	service, err := sd.NewService("127.0.0.1:8500", "change-sample", port, []string{"sample_tag"})
-	if err != nil {
-		log.Fatalf("Failed to get new consul %v", err)
-	}
-
-	service.InitHealthCheck(s, &sd.HealthImpl{
-		Status: grpc_health_v1.HealthCheckResponse_SERVING,
-	})
-
-	if err := service.Register(onClose); err !=nil {
-		log.Printf("Register consul failed")
-		panic(err)
-	}
-
-	log.Printf("Serve on :%d", port)
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
-	}
+	app.NewServer(s)
 }
 
-func onClose()  {
-	log.Printf("Closing...")
+type server struct {
+	sample_services.UnimplementedSampleServer
+}
+
+func (s *server) GetNumber(ctx context.Context, req *sample_services.SampleRequest) (*sample_services.SampleResponse, error) {
+	return &sample_services.SampleResponse{
+		Status: true,
+		Data: map[string]string{
+			"number":  "123",
+			"message": "Hello world",
+		},
+	}, nil
 }

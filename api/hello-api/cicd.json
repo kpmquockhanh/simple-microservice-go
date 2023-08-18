@@ -1,0 +1,17 @@
+{
+  "allow_generate_jenkinsfile": true,
+  "app_type": "api",
+  "build": {
+    "cmd_bin_dir": "api/hello-api",
+    "image_name": "kpmquockhanh/api/hello-api"
+  },
+  "deploy": {
+    "service_name": "hello-api",
+    "dev_expose_port": 31998,
+    "replicas": {
+      "staging": 1,
+      "production": 1
+    },
+    "config_remote_keys": []
+  }
+}

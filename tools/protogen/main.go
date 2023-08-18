@@ -1,17 +1,17 @@
-package cmd
+package main
 
 import (
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os/exec"
-	"strings"
 )
 
 func main() {
-	baseDirByte, _ := exec.Command("pwd").Output()
-	baseDir := strings.ReplaceAll(string(baseDirByte), "\n", "")
+	//baseDirByte, _ := exec.Command("pwd").Output()
+	//baseDir := strings.ReplaceAll(string(baseDirByte), "\n", "")
 	listPath := []string{"proto/models", "proto/services"}
+	//listPath := []string{"proto/models"}
 
 	for _, path := range listPath {
 		files, err := ioutil.ReadDir(path)
@@ -21,7 +21,7 @@ func main() {
 		for _, file := range files {
 			// If is
 			currentPath := fmt.Sprintf("%s/%s", path, file.Name())
-			log.Printf("Generating file %s/%s", baseDir, currentPath)
+			log.Printf("Generating file %s", currentPath)
 			out, err := exec.Command(
 				"protoc",
 				"--go-grpc_out=exmsg",
@@ -32,8 +32,9 @@ func main() {
 				currentPath).CombinedOutput()
 
 			if err != nil {
-				log.Print("Errors\n", string(out))
+				log.Printf("Errors %s", out)
 			}
+			log.Printf("Generating done %s", currentPath)
 		}
 	}
 }

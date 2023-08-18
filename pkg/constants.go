@@ -1,5 +1,5 @@
 package pkg
 
 const (
-	SampleClient = "change-sample"
+	SampleClient = "sample-service"
 )

@@ -43,7 +43,7 @@ func NewService(addr string, name string, port int, tags []string) (*ConsulServi
 	}, nil
 }
 
-func (r *ConsulService) InitHealthCheck(s *grpc.Server, healthSrv *HealthImpl)  {
+func (r *ConsulService) InitHealthCheck(s *grpc.Server, healthSrv *HealthImpl) {
 	grpc_health_v1.RegisterHealthServer(s, healthSrv)
 }
 
@@ -57,11 +57,11 @@ func (r *ConsulService) Register(onClose func()) error {
 	IP := LocalIP()
 	ID := fmt.Sprintf("go.sample.grpc.%v-%v-%v", r.Name, IP, r.Port)
 	reg := &api.AgentServiceRegistration{
-		ID: ID, // Name of the service node
-		Name: r.Name,
-		Tags: r.Tag,
-		Port: r.Port,
-		Address: "host.docker.internal",
+		ID:      ID, // Name of the service node
+		Name:    r.Name,
+		Tags:    r.Tag,
+		Port:    r.Port,
+		Address: IP,
 		Check: &api.AgentServiceCheck{
 			Interval:                       r.Interval.String(),
 			GRPC:                           fmt.Sprintf("%v:%v/%v", IP, r.Port, r.Name),
@@ -97,7 +97,7 @@ func (r *ConsulService) DeRegisterByID(ID string) error {
 	return nil
 }
 
-func (r *ConsulService) handleSigterm(onClose func())  {
+func (r *ConsulService) handleSigterm(onClose func()) {
 	done := make(chan os.Signal)
 	signal.Notify(done, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
