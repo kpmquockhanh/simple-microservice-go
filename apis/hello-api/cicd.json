@@ -2,7 +2,7 @@
   "allow_generate_jenkinsfile": true,
   "app_type": "api",
   "build": {
-    "cmd_bin_dir": "api/hello-api",
+    "cmd_bin_dir": "apis/hello-api",
     "image_name": "kpmquockhanh/api/hello-api"
   },
   "deploy": {

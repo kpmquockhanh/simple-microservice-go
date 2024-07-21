@@ -2,8 +2,8 @@ package main
 
 import (
 	"google.golang.org/grpc"
-	"simple-micro/api/hello-api/handler"
-	app2 "simple-micro/core/app"
+	"simple-micro/apis/hello-api/handlers"
+	"simple-micro/core/app"
 	logger2 "simple-micro/core/logger"
 	"simple-micro/core/transhttp"
 	sample_services "simple-micro/exmsg/services"
@@ -11,15 +11,15 @@ import (
 )
 
 func main() {
-	app := app2.App{
+	a := app.App{
 		Name:     "Hello",
 		Code:     "hello",
-		Type:     app2.APIType,
+		Type:     app.APIType,
 		BasePath: "/hello",
 		Port:     50052,
 	}
 
-	app.NewServer(&server{})
+	a.NewServer(&server{})
 }
 
 type server struct {
@@ -36,8 +36,8 @@ func (s *server) GetRoutes() transhttp.Routes {
 	return transhttp.Routes{
 		transhttp.Route{
 			Name: "Hello",
-			Path: "/demo",
-			Handler: &handler.HelloHandler{
+			Path: "/",
+			Handler: &handlers.HelloHandler{
 				SampleClient: s.SampleClient,
 			},
 		},

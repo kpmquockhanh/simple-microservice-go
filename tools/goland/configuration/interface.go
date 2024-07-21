@@ -47,8 +47,8 @@ type IdeConfig struct {
 func New(cicd Cicd, namePackage string) Component {
 	AdditionArgs := []string{""}
 	if cicd.AppType == "api" {
-		AdditionArgs = append(AdditionArgs, fmt.Sprintf("-http-port=%v", cicd.Deploy.DevExposePort), "-api-timeout=10000000")
-		cicd.Deploy.ConfigRemoteKeys = append(cicd.Deploy.ConfigRemoteKeys, "/api/common.toml")
+		AdditionArgs = append(AdditionArgs, fmt.Sprintf("-http-port=%v", cicd.Deploy.DevExposePort), "-apis-timeout=10000000")
+		cicd.Deploy.ConfigRemoteKeys = append(cicd.Deploy.ConfigRemoteKeys, "/apis/common.toml")
 	}
 
 	if cicd.AppType == "service" {

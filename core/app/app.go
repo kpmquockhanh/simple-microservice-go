@@ -13,6 +13,7 @@ import (
 	logger2 "simple-micro/core/logger"
 	"simple-micro/core/sd"
 	"simple-micro/core/transhttp"
+	"simple-micro/core/utils"
 	"syscall"
 	"time"
 )
@@ -24,11 +25,24 @@ type App struct {
 	Port              int64
 	Type              string
 	ClientConnections map[string]*grpc.ClientConn
-	logger            zap.SugaredLogger
+	logger            *zap.SugaredLogger
 }
 
 const APIType = "api"
 const ServiceType = "service"
+
+func loggingInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	logger := logger2.NewLogger()
+	logger.Infof("Received request: %v with req: %s", info.FullMethod, utils.ToJsonString(req))
+	resp, err := handler(ctx, req)
+	return resp, err
+}
+
+func (a *App) NewGrpcSever() *grpc.Server {
+	return grpc.NewServer(
+		grpc.UnaryInterceptor(loggingInterceptor),
+	)
+}
 
 func (a *App) newApiServer(ctx context.Context, s transhttp.ApiServer) {
 	// Will query consul every 5 seconds.
@@ -37,6 +51,7 @@ func (a *App) newApiServer(ctx context.Context, s transhttp.ApiServer) {
 	s.InitGrpcClients(a.ClientConnections)
 	a.initRoutes(s)
 	a.HandleSigTerm(func(app *App) {
+		a.logger.Info("Closing...")
 		a.CloseAllConn()
 	})
 	logger := a.logger
@@ -46,15 +61,14 @@ func (a *App) newApiServer(ctx context.Context, s transhttp.ApiServer) {
 }
 
 func (a *App) newServiceServer(s *grpc.Server) {
-	logger := logger2.NewLogger()
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", a.Port))
 	if err != nil {
-		logger.Fatalf("failed to listen: %v", err)
+		a.logger.Fatalf("failed to listen: %v", err)
 	}
 	//Use consul to register service
-	service, err := sd.NewService("127.0.0.1:8500", a.Code, int(a.Port), []string{"sample_tag"})
+	service, err := sd.NewService(fmt.Sprintf("consul:8500"), a.Code, int(a.Port), []string{"sample_tag"})
 	if err != nil {
-		logger.Fatalf("Failed to get new consul %v", err)
+		a.logger.Fatalf("Failed to get new consul %v", err)
 	}
 
 	service.InitHealthCheck(s, &sd.HealthImpl{
@@ -62,33 +76,35 @@ func (a *App) newServiceServer(s *grpc.Server) {
 	})
 
 	if err := service.Register(a.onClose); err != nil {
-		logger.Infof("Register consul failed")
+		a.logger.Infof("Register consul failed")
 		panic(err)
 	}
 
-	logger.Infof("Service %s started at %d", a.Code, a.Port)
+	a.logger.Infof("Service %s started at %d", a.Code, a.Port)
 	if err := s.Serve(lis); err != nil {
-		logger.Fatalf("failed to serve: %v", err)
+		a.logger.Fatalf("failed to serve: %v", err)
 	}
 }
 
 func (a *App) NewServer(s interface{}) {
 	a.logger = logger2.NewLogger()
 	defer a.CloseAllConn()
-	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	switch a.Type {
 	case APIType:
 		a.newApiServer(ctx, s.(transhttp.ApiServer))
 	case ServiceType:
 		a.newServiceServer(s.(*grpc.Server))
+	default:
+		panic("invalid server type")
 	}
 }
 
 func (a *App) initRoutes(s transhttp.ApiServer) {
 	for _, route := range s.GetRoutes() {
-		http.Handle(fmt.Sprintf("%s%s", a.BasePath, route.Path), route.Handler)
 		a.logger.Infof("Init route %s%s", a.BasePath, route.Path)
+		http.Handle(fmt.Sprintf("%s%s", a.BasePath, route.Path), route.Handler)
 	}
 }
 
@@ -96,6 +112,7 @@ func (a *App) initGrpcConnections(ctx context.Context, clientNames []string) {
 	a.ClientConnections = make(map[string]*grpc.ClientConn)
 	for _, name := range clientNames {
 		address := a.getAddressByName(name)
+		a.logger.Infof("Dialing grpc to %s", address)
 		conn, err := grpc.DialContext(ctx, address, grpc.WithInsecure(), grpc.WithBlock())
 		if err != nil {
 			a.logger.Fatalf("Call grpc to %s (%s) failed: %v\n", name, address, err.Error())

@@ -55,7 +55,7 @@ func (r *ConsulService) GetAddress(name string) string {
 func (r *ConsulService) Register(onClose func()) error {
 	agent := r.Client.Agent()
 	IP := LocalIP()
-	ID := fmt.Sprintf("go.sample.grpc.%v-%v-%v", r.Name, IP, r.Port)
+	ID := fmt.Sprintf("go.kpmquockhanh.grpc.%v-%v-%v", r.Name, IP, r.Port)
 	reg := &api.AgentServiceRegistration{
 		ID:      ID, // Name of the service node
 		Name:    r.Name,

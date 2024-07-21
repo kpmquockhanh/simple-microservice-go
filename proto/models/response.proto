@@ -1,5 +1,5 @@
 syntax = "proto3";
 
 package core.models;
-option go_package = "simple-micro/api/models";
+option go_package = "simple-micro/apis/models";
 

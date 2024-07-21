@@ -20,7 +20,7 @@ func main() {
 		return
 	}
 
-	listGenTypes := []string{"api", "services"}
+	listGenTypes := []string{"apis", "services"}
 	for _, genType := range listGenTypes {
 		err := filepath.Walk(fmt.Sprintf("%v/%s", currentDir, genType), func(path string, info os.FileInfo, err error) error {
 			if info.Name() == "main.go" {

@@ -1,6 +1,6 @@
 syntax = "proto3";
 package core.services;
-option go_package = "simple-micro/api/services";
+option go_package = "simple-micro/apis/services";
 
 service Sample {
   rpc GetNumber(SampleRequest) returns (SampleResponse);
