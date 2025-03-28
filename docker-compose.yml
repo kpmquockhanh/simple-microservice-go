@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  consul:
+    image: hashicorp/consul:latest
+    container_name: consul
+    restart: unless-stopped
+    ports:
+      - "8500:8500"  # HTTP API
+      - "8600:8600/udp"  # DNS Interface
+      - "8600:8600/tcp"
+      - "8300:8300"  # Server RPC
+      - "8301:8301/tcp"  # Serf LAN
+      - "8301:8301/udp"
+      - "8302:8302/tcp"  # Serf WAN
+      - "8302:8302/udp"
+    environment:
+      - CONSUL_BIND_INTERFACE=eth0
+    command: ["agent", "-server", "-bootstrap", "-ui", "-client=0.0.0.0"]
+    volumes:
+      - consul_data:/consul/data
+
+volumes:
+  consul_data:

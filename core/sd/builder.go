@@ -22,7 +22,7 @@ func (b *ConsulResolverBuilder) Build(target resolver.Target, cc resolver.Client
 		target:        target,
 		cc:            cc,
 		consul:        consul,
-		addr:          make(chan []resolver.Address, 1),
+		state:         make(chan resolver.State),
 		done:          make(chan struct{}, 1),
 		watchInterval: b.WatchInterval,
 	}

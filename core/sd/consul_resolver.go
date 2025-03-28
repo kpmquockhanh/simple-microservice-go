@@ -18,7 +18,7 @@ type ConsulResolver struct {
 	target        resolver.Target
 	cc            resolver.ClientConn
 	consul        *api.Client
-	addr          chan []resolver.Address
+	state         chan resolver.State
 	done          chan struct{}
 	watchInterval time.Duration
 }
@@ -34,8 +34,8 @@ func (r *ConsulResolver) Close() {
 func (r *ConsulResolver) updater() {
 	for {
 		select {
-		case addrs := <-r.addr:
-			r.cc.NewAddress(addrs)
+		case state := <-r.state:
+			r.cc.UpdateState(state)
 		case <-r.done:
 			return
 		}
@@ -60,7 +60,7 @@ func (r *ConsulResolver) resolve() {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	services, _, err := r.consul.Catalog().Service(r.target.Endpoint, "", nil)
+	services, _, err := r.consul.Catalog().Service(r.target.Endpoint(), "", nil)
 	if err != nil {
 		return
 	}
@@ -77,9 +77,12 @@ func (r *ConsulResolver) resolve() {
 
 		addresses = append(addresses, resolver.Address{
 			Addr:       address + ":" + strconv.Itoa(port),
-			ServerName: r.target.Endpoint,
+			ServerName: r.target.Endpoint(),
 		})
 	}
 
-	r.addr <- addresses
+	state := resolver.State{
+		Addresses: addresses,
+	}
+	r.state <- state
 }
