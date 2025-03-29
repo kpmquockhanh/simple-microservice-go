@@ -5,6 +5,7 @@ import (
 	"github.com/spf13/cast"
 	"net/http"
 	logger2 "simple-micro/core/logger"
+	"simple-micro/core/response"
 	"simple-micro/core/transhttp"
 	sample_services "simple-micro/exmsg/services"
 )
@@ -21,11 +22,8 @@ func (h *HelloHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		logger.Infow("Error when GetNumber", "error", err)
-		transhttp.Json(w, map[string]interface{}{
-			"error":   true,
-			"message": err.Error(),
-		})
+		transhttp.Json(w, response.NewResponse(500, err.Error(), nil))
 		return
 	}
-	transhttp.Json(w, resp)
+	transhttp.Json(w, response.NewResponse(200, "success", resp.Data))
 }

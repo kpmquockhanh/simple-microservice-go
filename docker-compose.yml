@@ -1,24 +1,39 @@
+
 version: '3.8'
 
 services:
+  # Consul Server
   consul:
-    image: hashicorp/consul:latest
+    image: hashicorp/consul
     container_name: consul
-    restart: unless-stopped
     ports:
-      - "8500:8500"  # HTTP API
-      - "8600:8600/udp"  # DNS Interface
-      - "8600:8600/tcp"
-      - "8300:8300"  # Server RPC
-      - "8301:8301/tcp"  # Serf LAN
-      - "8301:8301/udp"
-      - "8302:8302/tcp"  # Serf WAN
-      - "8302:8302/udp"
-    environment:
-      - CONSUL_BIND_INTERFACE=eth0
-    command: ["agent", "-server", "-bootstrap", "-ui", "-client=0.0.0.0"]
+      - "8500:8500"  # Consul UI
     volumes:
       - consul_data:/consul/data
+    command: agent -server -bootstrap-expect=1 -ui -client=0.0.0.0
+    networks:
+      - app-network
 
+  # MongoDB
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"  # MongoDB default port
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - app-network
+
+# Volumes for persistent data
 volumes:
   consul_data:
+  mongodb_data:
+
+# Network for communication between services
+networks:
+  app-network:
+    driver: bridge
