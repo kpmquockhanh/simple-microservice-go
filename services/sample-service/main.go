@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	app2 "simple-micro/core/app"
 	sample_services "simple-micro/exmsg/services"
 	"simple-micro/pkg"
@@ -15,15 +14,17 @@ func main() {
 		Type: app2.ServiceType,
 		Port: 50051,
 	}
+
+	app.LoadConfig()
 	s := app.NewGrpcSever()
-	sample_services.RegisterSampleServer(s, &server{})
+
+	err := app.InitDatabase("mongo")
+	if err != nil {
+		panic(err)
+	}
+
+	sample_services.RegisterSampleServer(s, &handlers.Server{
+		MongoDb: app.Dbs.Mongo,
+	})
 	app.NewServer(s)
-}
-
-type server struct {
-	sample_services.UnimplementedSampleServer
-}
-
-func (s *server) GetNumber(ctx context.Context, req *sample_services.SampleRequest) (*sample_services.SampleResponse, error) {
-	return handlers.GetNumber(ctx, req)
 }

@@ -29,4 +29,14 @@ require (
 	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013 // indirect
+	github.com/golang/protobuf v1.5.2
+	github.com/hashicorp/consul/api v1.9.1
+	github.com/spf13/cast v1.6.0
+	go.mongodb.org/mongo-driver v1.17.2
+	go.uber.org/zap v1.25.0
+	golang.org/x/text v0.21.0 // indirect
+	google.golang.org/grpc v1.39.0
+	gorm.io/driver/mysql v1.5.7
+	gorm.io/driver/postgres v1.5.11
+	gorm.io/gorm v1.25.12
 )

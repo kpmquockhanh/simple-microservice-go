@@ -18,7 +18,7 @@ func main() {
 		BasePath: "/hello",
 		Port:     50052,
 	}
-
+	a.LoadConfig()
 	a.NewServer(&server{})
 }
 
